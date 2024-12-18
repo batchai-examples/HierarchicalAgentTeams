@@ -1,252 +1,165 @@
-from typing import Literal
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from typing import Annotated, List, Optional, Literal, Dict
+from pathlib import Path
+import os
+
+from typing_extensions import TypedDict
+
 from langchain_community.document_loaders import WebBaseLoader
-from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings
-from langchain import hub
-from langchain_core.output_parsers import StrOutputParser
-
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
 from langchain_community.tools.tavily_search import TavilySearchResults
-from pydantic import BaseModel, Field
-### from langchain_cohere import CohereEmbeddings
+from langchain_core.tools import tool
+from langchain_core.language_models.chat_models import BaseChatModel
+
+from langchain_experimental.utilities import PythonREPL
+
+from langgraph.graph import MessagesState, END
+from langgraph.types import Command
 
 
 
-# create index ########################################################################################################
-### Build Index
-from langchain_core.vectorstores import VectorStoreRetriever;
+# ResearchTeam tools
+# The research team can use a search engine and url scraper to find information on the web. Feel free to 
+# add additional functionality below to boost the team performance!
 
-def build_index() -> VectorStoreRetriever:
-
-    # Set embeddings
-    embd = OpenAIEmbeddings()
-
-    # Docs to index
-    urls = [
-        "https://lilianweng.github.io/posts/2023-06-23-agent/",
-        "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
-        "https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/",
-    ]
-
-    # Load
-    docs = [WebBaseLoader(url).load() for url in urls]
-    docs_list = [item for sublist in docs for item in sublist]
-
-    # Split
-    text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-        chunk_size=500, chunk_overlap=0
-    )
-    doc_splits = text_splitter.split_documents(docs_list)
-
-    # Add to vectorstore
-    vectorstore = Chroma.from_documents(
-        documents=doc_splits,
-        collection_name="rag-chroma",
-        embedding=embd,
-    )
-    return vectorstore.as_retriever()
-
-retriever = build_index()
+tavily_tool = TavilySearchResults(max_results=5)
 
 
-# LLMs ###################################################################################################################
-
-def build_question_router():
-    # Data model
-    class RouteQuery(BaseModel):
-        """Route a user query to the most relevant datasource."""
-
-        datasource: Literal["vectorstore", "web_search"] = Field(
-            ...,
-            description="Given a user question choose to route it to web search or a vectorstore.",
-        )
-
-
-    # LLM with function call
-    llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
-    structured_llm_router = llm.with_structured_output(RouteQuery)
-
-    # Prompt
-    system = """You are an expert at routing a user question to a vectorstore or web search.
-    The vectorstore contains documents related to agents, prompt engineering, and adversarial attacks.
-    Use the vectorstore for questions on these topics. Otherwise, use web-search."""
-    route_prompt = ChatPromptTemplate.from_messages(
+@tool
+def scrape_webpages(urls: List[str]) -> str:
+    """Use requests and bs4 to scrape the provided web pages for detailed information."""
+    loader = WebBaseLoader(urls)
+    docs = loader.load()
+    return "\n\n".join(
         [
-            ("system", system),
-            ("human", "{question}"),
+            f'<Document name="{doc.metadata.get("title", "")}">\n{doc.page_content}\n</Document>'
+            for doc in docs
         ]
     )
 
-    question_router = route_prompt | structured_llm_router
-    # print(
-    #     question_router.invoke(
-    #         {"question": "Who will the Bears draft first in the NFL draft?"}
-    #     )
-    # )
-    # print(question_router.invoke({"question": "What are the types of agent memory?"}))
-    return question_router
 
-question_router = build_question_router()
-
-### Retrieval Grader ##################################################################################################
-def build_retrieval_grader():
-
-    # Data model
-    class GradeDocuments(BaseModel):
-        """Binary score for relevance check on retrieved documents."""
-
-        binary_score: str = Field(
-            description="Documents are relevant to the question, 'yes' or 'no'"
-        )
+# Document writing team tools
+# Next up, we will give some tools for the doc writing team to use. We define some bare-bones file-access tools below.
+# Note that this gives the agents access to your file-system, which can be unsafe. 
+# We also haven't optimized the tool descriptions for performance.
 
 
-    # LLM with function call
-    llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
-    structured_llm_grader = llm.with_structured_output(GradeDocuments)
+# _TEMP_DIRECTORY = TemporaryDirectory()
+# WORKING_DIRECTORY = Path(_TEMP_DIRECTORY.name)
+WORKING_DIRECTORY = Path(os.getcwd())
 
-    # Prompt
-    system = """You are a grader assessing relevance of a retrieved document to a user question. \n 
-        If the document contains keyword(s) or semantic meaning related to the user question, grade it as relevant. \n
-        It does not need to be a stringent test. The goal is to filter out erroneous retrievals. \n
-        Give a binary score 'yes' or 'no' score to indicate whether the document is relevant to the question."""
-    grade_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", system),
-            ("human", "Retrieved document: \n\n {document} \n\n User question: {question}"),
-        ]
+@tool
+def create_outline(
+    points: Annotated[List[str], "List of main points or sections."],
+    file_name: Annotated[str, "File path to save the outline."],
+) -> Annotated[str, "Path of the saved outline file."]:
+    """Create and save an outline."""
+    with (WORKING_DIRECTORY / file_name).open("w") as file:
+        for i, point in enumerate(points):
+            file.write(f"{i + 1}. {point}\n")
+    return f"Outline saved to {file_name}"
+
+
+@tool
+def read_document(
+    file_name: Annotated[str, "File path to read the document from."],
+    start: Annotated[Optional[int], "The start line. Default is 0"] = None,
+    end: Annotated[Optional[int], "The end line. Default is None"] = None,
+) -> str:
+    """Read the specified document."""
+    with (WORKING_DIRECTORY / file_name).open("r") as file:
+        lines = file.readlines()
+    if start is not None:
+        start = 0
+    return "\n".join(lines[start:end])
+
+
+@tool
+def write_document(
+    content: Annotated[str, "Text content to be written into the document."],
+    file_name: Annotated[str, "File path to save the document."],
+) -> Annotated[str, "Path of the saved document file."]:
+    """Create and save a text document."""
+    with (WORKING_DIRECTORY / file_name).open("w") as file:
+        file.write(content)
+    return f"Document saved to {file_name}"
+
+
+@tool
+def edit_document(
+    file_name: Annotated[str, "Path of the document to be edited."],
+    inserts: Annotated[
+        Dict[int, str],
+        "Dictionary where key is the line number (1-indexed) and value is the text to be inserted at that line.",
+    ],
+) -> Annotated[str, "Path of the edited document file."]:
+    """Edit a document by inserting text at specific line numbers."""
+
+    with (WORKING_DIRECTORY / file_name).open("r") as file:
+        lines = file.readlines()
+
+    sorted_inserts = sorted(inserts.items())
+
+    for line_number, text in sorted_inserts:
+        if 1 <= line_number <= len(lines) + 1:
+            lines.insert(line_number - 1, text + "\n")
+        else:
+            return f"Error: Line number {line_number} is out of range."
+
+    with (WORKING_DIRECTORY / file_name).open("w") as file:
+        file.writelines(lines)
+
+    return f"Document edited and saved to {file_name}"
+
+
+# Warning: This executes code locally, which can be unsafe when not sandboxed
+
+repl = PythonREPL()
+
+
+@tool
+def python_repl_tool(
+    code: Annotated[str, "The python code to execute to generate your chart."],
+):
+    """Use this to execute python code. If you want to see the output of a value,
+    you should print it out with `print(...)`. This is visible to the user."""
+    try:
+        result = repl.run(code)
+    except BaseException as e:
+        return f"Failed to execute. Error: {repr(e)}"
+    return f"Successfully executed:\n\`\`\`python\n{code}\n\`\`\`\nStdout: {result}"
+
+# Helper Utilities
+# We are going to create a few utility functions to make it more concise when we want to:
+# 
+# Create a worker agent.
+# Create a supervisor for the sub-graph.
+# These will simplify the graph compositional code at the end for us so it's easier to see what's going on.
+
+
+def make_supervisor_node(llm: BaseChatModel, members: list[str]) -> str:
+    options = ["FINISH"] + members
+    system_prompt = (
+        "You are a supervisor tasked with managing a conversation between the"
+        f" following workers: {members}. Given the following user request,"
+        " respond with the worker to act next. Each worker will perform a"
+        " task and respond with their results and status. When finished,"
+        " respond with FINISH."
     )
 
-    retrieval_grader = grade_prompt | structured_llm_grader
-    
-    return retrieval_grader
+    class Router(TypedDict):
+        """Worker to route to next. If no workers needed, route to FINISH."""
 
-retrieval_grader = build_retrieval_grader()
+        next: Literal[*options]
 
-# question = "agent memory"
-# docs = retriever.invoke(question)
-# doc_txt = docs[1].page_content
-# print(retrieval_grader.invoke({"question": question, "document": doc_txt}))
-    
+    def supervisor_node(state: MessagesState) -> Command[Literal[*members, "__end__"]]:
+        """An LLM-based router."""
+        messages = [
+            {"role": "system", "content": system_prompt},
+        ] + state["messages"]
+        response = llm.with_structured_output(Router).invoke(messages)
+        goto = response["next"]
+        if goto == "FINISH":
+            goto = END
 
-### Generate ##########################################################################################################
-def build_rag_chain():
-    # Prompt
-    prompt = hub.pull("rlm/rag-prompt")
+        return Command(goto=goto)
 
-    # LLM
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
-
-
-    # Post-processing
-    def format_docs(docs):
-        return "\n\n".join(doc.page_content for doc in docs)
-
-
-    # Chain
-    rag_chain = prompt | llm | StrOutputParser()
-    return rag_chain
-
-rag_chain = build_rag_chain()
-# # Run
-# generation = rag_chain.invoke({"context": docs, "question": question})
-# print(generation)
-
-### Hallucination Grader ################################################################################################
-
-def build_hallucination_grader():
-    # Data model
-    class GradeHallucinations(BaseModel):
-        """Binary score for hallucination present in generation answer."""
-
-        binary_score: str = Field(
-            description="Answer is grounded in the facts, 'yes' or 'no'"
-        )
-
-
-    # LLM with function call
-    llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
-    structured_llm_grader = llm.with_structured_output(GradeHallucinations)
-
-    # Prompt
-    system = """You are a grader assessing whether an LLM generation is grounded in / supported by a set of retrieved facts. \n 
-        Give a binary score 'yes' or 'no'. 'Yes' means that the answer is grounded in / supported by the set of facts."""
-    hallucination_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", system),
-            ("human", "Set of facts: \n\n {documents} \n\n LLM generation: {generation}"),
-        ]
-    )
-
-    hallucination_grader = hallucination_prompt | structured_llm_grader
-    return hallucination_grader
-
-hallucination_grader = build_hallucination_grader()
-#hallucination = hallucination_grader.invoke({"documents": docs, "generation": generation})
-#print(hallucination)
-## GradeHallucinations(binary_score='yes')
-
-### Answer Grader ######################################################################################################
-def build_answer_grader():
-
-    # Data model
-    class GradeAnswer(BaseModel):
-        """Binary score to assess answer addresses question."""
-
-        binary_score: str = Field(
-            description="Answer addresses the question, 'yes' or 'no'"
-        )
-
-
-    # LLM with function call
-    llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
-    structured_llm_grader = llm.with_structured_output(GradeAnswer)
-
-    # Prompt
-    system = """You are a grader assessing whether an answer addresses / resolves a question \n 
-        Give a binary score 'yes' or 'no'. Yes' means that the answer resolves the question."""
-    answer_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", system),
-            ("human", "User question: \n\n {question} \n\n LLM generation: {generation}"),
-        ]
-    )
-
-    answer_grader = answer_prompt | structured_llm_grader
-    return answer_grader
-
-answer_grader = build_answer_grader()
-#answer_grader.invoke({"question": question, "generation": generation})
-
-## GradeAnswer(binary_score='yes')
-
-### Question Re-writer ################################################################################################
-def build_question_rewriter():
-    # LLM
-    llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
-
-    # Prompt
-    system = """You a question re-writer that converts an input question to a better version that is optimized \n 
-        for vectorstore retrieval. Look at the input and try to reason about the underlying semantic intent / meaning."""
-    re_write_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", system),
-            (
-                "human",
-                "Here is the initial question: \n\n {question} \n Formulate an improved question.",
-            ),
-        ]
-    )
-
-    question_rewriter = re_write_prompt | llm | StrOutputParser()
-    return question_rewriter
-
-question_rewriter = build_question_rewriter()
-#question_rewriter.invoke({"question": question})
-
-## "What is the role of memory in an agent's functioning?"
-
-### Search #############################################################################################################
-
-web_search_tool = TavilySearchResults(k=3)
+    return supervisor_node
