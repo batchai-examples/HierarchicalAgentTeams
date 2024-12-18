@@ -15,39 +15,43 @@ from tools import tavily_tool, scrape_webpages, make_supervisor_node
 
 # Research Team
 # The research team will have a search agent and a web scraping "research_agent" as the two worker nodes. 
-# Let's create those, as well as the team supervisor.
+# Let's create those, as well as the team research_team_supervisor.
 
 llm = ChatOpenAI(model="gpt-4o")
 
 search_agent = create_react_agent(llm, tools=[tavily_tool])
 
 
-def search_node(state: MessagesState) -> Command[Literal["supervisor"]]:
+def search_node(state: MessagesState) -> Command[Literal["research_team_supervisor"]]:
     result = search_agent.invoke(state)
+
+    last_response = result["messages"][-1].content
     return Command(
         update={
             "messages": [
-                HumanMessage(content=result["messages"][-1].content, name="search")
+                HumanMessage(content=last_response, name="search")
             ]
         },
-        # We want our workers to ALWAYS "report back" to the supervisor when done
-        goto="supervisor",
+        # We want our workers to ALWAYS "report back" to the research_team_supervisor when done
+        goto="research_team_supervisor",
     )
 
 
 web_scraper_agent = create_react_agent(llm, tools=[scrape_webpages])
 
 
-def web_scraper_node(state: MessagesState) -> Command[Literal["supervisor"]]:
+def web_scraper_node(state: MessagesState) -> Command[Literal["research_team_supervisor"]]:
     result = web_scraper_agent.invoke(state)
+
+    last_response = result["messages"][-1].content
     return Command(
         update={
             "messages": [
-                HumanMessage(content=result["messages"][-1].content, name="web_scraper")
+                HumanMessage(content=last_response, name="web_scraper")
             ]
         },
-        # We want our workers to ALWAYS "report back" to the supervisor when done
-        goto="supervisor",
+        # We want our workers to ALWAYS "report back" to the research_team_supervisor when done
+        goto="research_team_supervisor",
     )
 
 
@@ -57,11 +61,11 @@ research_supervisor_node = make_supervisor_node(llm, ["search", "web_scraper"])
 # Add the nodes to the team graph, and define the edges, which determine the transition criteria.
 
 research_builder = StateGraph(MessagesState)
-research_builder.add_node("supervisor", research_supervisor_node)
+research_builder.add_node("research_team_supervisor", research_supervisor_node)
 research_builder.add_node("search", search_node)
 research_builder.add_node("web_scraper", web_scraper_node)
 
-research_builder.add_edge(START, "supervisor")
+research_builder.add_edge(START, "research_team_supervisor")
 research_graph = research_builder.compile()
 
 ###############################################################################

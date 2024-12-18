@@ -8,6 +8,8 @@ for s in super_graph.stream(
         ],
     },
     {"recursion_limit": 150},
+    subgraphs=True,
 ):
     pprint(s)
     pprint("---")
+    print("\n\n")

@@ -25,28 +25,38 @@ llm = ChatOpenAI(model="gpt-4o")
 teams_supervisor_node = make_supervisor_node(llm, ["research_team", "writing_team"])
 
 def call_research_team(state: MessagesState) -> Command[Literal["supervisor"]]:
-    response = research_graph.invoke({"messages": state["messages"][-1]})
-    return Command(
-        update={
-            "messages": [
+    last_message = state["messages"][-1]
+    response = research_graph.invoke({"messages": last_message})
+    
+    last_response = response["messages"][-1].content
+    messages = [
                 HumanMessage(
-                    content=response["messages"][-1].content, name="research_team"
+                    content=last_response, name="research_team"
                 )
             ]
+
+    return Command(
+        update={
+            "messages": messages
         },
         goto="supervisor",
     )
 
 
 def call_paper_writing_team(state: MessagesState) -> Command[Literal["supervisor"]]:
-    response = paper_writing_graph.invoke({"messages": state["messages"][-1]})
-    return Command(
-        update={
-            "messages": [
+    last_message = state["messages"][-1]
+    response = paper_writing_graph.invoke({"messages": last_message})
+
+    last_response = response["messages"][-1].content
+    messages = [
                 HumanMessage(
-                    content=response["messages"][-1].content, name="writing_team"
+                    content=last_response, name="writing_team"
                 )
             ]
+
+    return Command(
+        update={
+            "messages": messages
         },
         goto="supervisor",
     )

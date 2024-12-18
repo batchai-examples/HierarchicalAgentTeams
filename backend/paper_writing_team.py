@@ -30,16 +30,18 @@ doc_writer_agent = create_react_agent(
 )
 
 
-def doc_writing_node(state: MessagesState) -> Command[Literal["supervisor"]]:
+def doc_writing_node(state: MessagesState) -> Command[Literal["doc_writing_team_supervisor"]]:
     result = doc_writer_agent.invoke(state)
+
+    last_response = result["messages"][-1].content
     return Command(
         update={
             "messages": [
-                HumanMessage(content=result["messages"][-1].content, name="doc_writer")
+                HumanMessage(content=last_response, name="doc_writer")
             ]
         },
-        # We want our workers to ALWAYS "report back" to the supervisor when done
-        goto="supervisor",
+        # We want our workers to ALWAYS "report back" to the doc_writing_team_supervisor when done
+        goto="doc_writing_team_supervisor",
     )
 
 
@@ -53,16 +55,18 @@ note_taking_agent = create_react_agent(
 )
 
 
-def note_taking_node(state: MessagesState) -> Command[Literal["supervisor"]]:
+def note_taking_node(state: MessagesState) -> Command[Literal["doc_writing_team_supervisor"]]:
     result = note_taking_agent.invoke(state)
+
+    last_response = result["messages"][-1].content
     return Command(
         update={
             "messages": [
-                HumanMessage(content=result["messages"][-1].content, name="note_taker")
+                HumanMessage(content=last_response, name="note_taker")
             ]
         },
-        # We want our workers to ALWAYS "report back" to the supervisor when done
-        goto="supervisor",
+        # We want our workers to ALWAYS "report back" to the doc_writing_team_supervisor when done
+        goto="doc_writing_team_supervisor",
     )
 
 
@@ -71,18 +75,20 @@ chart_generating_agent = create_react_agent(
 )
 
 
-def chart_generating_node(state: MessagesState) -> Command[Literal["supervisor"]]:
+def chart_generating_node(state: MessagesState) -> Command[Literal["doc_writing_team_supervisor"]]:
     result = chart_generating_agent.invoke(state)
+
+    last_response = result["messages"][-1].content
     return Command(
         update={
             "messages": [
                 HumanMessage(
-                    content=result["messages"][-1].content, name="chart_generator"
+                    content=last_response, name="chart_generator"
                 )
             ]
         },
-        # We want our workers to ALWAYS "report back" to the supervisor when done
-        goto="supervisor",
+        # We want our workers to ALWAYS "report back" to the doc_writing_team_supervisor when done
+        goto="doc_writing_team_supervisor",
     )
 
 
@@ -94,12 +100,12 @@ doc_writing_supervisor_node = make_supervisor_node(
 
 # Create the graph here
 paper_writing_builder = StateGraph(MessagesState)
-paper_writing_builder.add_node("supervisor", doc_writing_supervisor_node)
+paper_writing_builder.add_node("doc_writing_team_supervisor", doc_writing_supervisor_node)
 paper_writing_builder.add_node("doc_writer", doc_writing_node)
 paper_writing_builder.add_node("note_taker", note_taking_node)
 paper_writing_builder.add_node("chart_generator", chart_generating_node)
 
-paper_writing_builder.add_edge(START, "supervisor")
+paper_writing_builder.add_edge(START, "doc_writing_team_supervisor")
 paper_writing_graph = paper_writing_builder.compile()
 
 # from IPython.display import Image
