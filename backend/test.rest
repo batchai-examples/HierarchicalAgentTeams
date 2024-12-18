@@ -1,0 +1,6 @@
+###
+POST http://localhost:3001/rest/v1/question
+
+{
+    "question": "What player at the Bears expected to draft first in the 2024 NFL draft?"
+}
