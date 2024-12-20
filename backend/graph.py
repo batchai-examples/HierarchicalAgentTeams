@@ -1,6 +1,7 @@
 from typing import Literal
+import asyncio
 
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessageChunk
 from langchain_openai import ChatOpenAI
 
 from langgraph.graph import StateGraph, MessagesState, START
@@ -83,13 +84,28 @@ super_graph = super_builder.compile()
 
 # print(f"Graph has been saved to {output_path}")
 
-# for s in super_graph.stream(
-#     {
-#         "messages": [
-#             ("user", "Research AI agents and write a brief report about them.")
-#         ],
-#     },
-#     {"recursion_limit": 150},
-# ):
-#     pprint(s)
-#     pprint("---")
+async def test_graph():
+    async for messages in super_graph.astream(
+        {
+            "messages": [
+                ("user", "Research AI agents and write a brief report about them.")
+            ],
+        },
+        {"recursion_limit": 150},
+        stream_mode="messages"
+    ):
+        #print(messages)
+        #print('------------------------')
+
+        checkpoint_ns:str = messages[1]["checkpoint_ns"]
+        is_cared_checkpoints = checkpoint_ns.startswith("search:") or checkpoint_ns.startswith("note_taker:")
+        if True or is_cared_checkpoints:
+            for msg in messages:
+                if isinstance(msg, AIMessageChunk):
+                    content = msg.content
+                    if content:
+                        print(content, end="", flush=True)
+
+if __name__ == "__main__":
+    asyncio.run(test_graph())
+    print()

@@ -94,7 +94,7 @@ def chart_generating_node(state: MessagesState) -> Command[Literal["doc_writing_
 
 
 doc_writing_supervisor_node = make_supervisor_node(
-    llm, ["note_taker", "chart_generator"]
+    llm, ["note_taker"]
 )
 
 # With the objects themselves created, we can form the graph.
@@ -104,7 +104,7 @@ paper_writing_builder = StateGraph(MessagesState)
 paper_writing_builder.add_node("doc_writing_team_supervisor", doc_writing_supervisor_node)
 #paper_writing_builder.add_node("doc_writer", doc_writing_node)
 paper_writing_builder.add_node("note_taker", note_taking_node)
-paper_writing_builder.add_node("chart_generator", chart_generating_node)
+#paper_writing_builder.add_node("chart_generator", chart_generating_node)
 
 paper_writing_builder.add_edge(START, "doc_writing_team_supervisor")
 paper_writing_graph = paper_writing_builder.compile()
