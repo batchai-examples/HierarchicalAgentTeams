@@ -4,6 +4,11 @@ Demostrates [Hierarchical Agent Teams](https://langchain-ai.github.io/langgraph/
 
 ## Screenshot
 
+<video width="640" height="360" controls>
+  <source src="doc/screen.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 <div align="center">
   <img src="doc/research_graph.png">
   <img src="doc/paper_writing_graph.png">
