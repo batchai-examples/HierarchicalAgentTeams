@@ -1,6 +1,7 @@
 from typing import Literal
-
-from langchain_core.messages import HumanMessage
+import asyncio
+from langchain_core.messages import HumanMessage, AIMessageChunk
+from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 
@@ -40,8 +41,8 @@ def search_node(state: MessagesState) -> Command[Literal["research_team_supervis
 web_scraper_agent = create_react_agent(llm, tools=[scrape_webpages])
 
 
-def web_scraper_node(state: MessagesState) -> Command[Literal["research_team_supervisor"]]:
-    result = web_scraper_agent.invoke(state)
+def web_scraper_node(state: MessagesState, config: RunnableConfig) -> Command[Literal["research_team_supervisor"]]:
+    result = web_scraper_agent.invoke(state, config)
 
     last_response = result["messages"][-1].content
     return Command(
@@ -83,11 +84,20 @@ research_graph = research_builder.compile()
 ###############################################################################
 # We can give this team work directly. Try it out below.
 
-# for s in research_graph.stream(
-#     {"messages": [("user", "when is Taylor Swift's next tour?")]},
-#     {"recursion_limit": 100},
-# ):
-#     pprint(s)
-#     pprint("---")
+async def test_research_team():
+    async for messages in research_graph.astream(
+        {"messages": [("user", "when is Taylor Swift's next tour?")]},
+        {"recursion_limit": 100},
+        stream_mode="messages"
+    ):
+        checkpoint_ns:str = messages[1]["checkpoint_ns"]
+        if checkpoint_ns.startswith("search:"):
+            for msg in messages:
+                if isinstance(msg, AIMessageChunk):
+                    content = msg.content
+                    if content:
+                        print(content, end="", flush=True)
 
-
+if __name__ == "__main__":
+    asyncio.run(test_research_team())
+    print()
