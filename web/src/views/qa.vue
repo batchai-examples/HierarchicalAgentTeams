@@ -1,9 +1,9 @@
 <template>
   <div class="app">
-    <h1>Question and Answer</h1>
+    <h1>Ask a Question</h1>
 
     <form @submit.prevent="submitQuestion">
-      <label for="question">Enter your question:</label>
+      <label for="question">Your question:</label>
       <input
         id="question"
         v-model="question"
@@ -16,16 +16,18 @@
 
     <div v-if="isLoading" class="loading">Loading answer...</div>
 
-    <div v-if="answers.length > 0" class="answers">
-      <h2>Answer:</h2>
-      <div v-for="(answer, index) in answers" :key="index" class="answer">
-        {{ answer }}
-      </div>
+    <!-- Answer container -->
+    <div v-if="answers.length > 0" class="answers" ref="answersContainer">
+      <h2>Response:</h2>
+      <!-- Render Markdown content as HTML -->
+      <div class="answer" v-html="formattedAnswers"></div>
     </div>
   </div>
 </template>
 
 <script>
+import { marked } from "marked";
+
 export default {
   data() {
     return {
@@ -34,6 +36,18 @@ export default {
       isLoading: false,
       eventSource: null,
     };
+  },
+  computed: {
+    formattedAnswers() {
+      // Combine all answers into one Markdown string and render to HTML
+      //return marked(this.answers.join(""));
+      const result = this.answers.join("").replace(/\\n/g, "\n");
+      //result = result.replace(/\n/g, "<br>");
+      if (result.indexOf("\\n") >=0 ) {
+        //alert("has feed line");
+      }
+      return marked.parse(result);
+    },
   },
   methods: {
     submitQuestion() {
@@ -60,6 +74,7 @@ export default {
           this.eventSource = null;
         } else {
           this.answers.push(data);
+          this.scrollToBottom(); // Scroll to the bottom on new data
         }
       };
 
@@ -71,6 +86,15 @@ export default {
           this.eventSource = null;
         }
       };
+    },
+    scrollToBottom() {
+      // Scroll the answers container to the bottom
+      this.$nextTick(() => {
+        const container = this.$refs.answersContainer;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      });
     },
   },
   beforeUnmount() {
@@ -90,7 +114,7 @@ body {
 }
 
 .app {
-  max-width: 600px;
+  max-width: 1000px;
   margin: 50px auto;
   padding: 20px;
   background: #fff;
@@ -123,15 +147,23 @@ button:hover {
 
 .answers {
   margin-top: 20px;
+  max-height: 400px; /* Limit height */
+  overflow-y: auto; /* Enable scrolling */
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 4px;
+  background: #f9f9f9;
 }
 
 .answer {
   background: #f0f0f0;
   padding: 10px;
-  margin-bottom: 10px;
   border-radius: 4px;
+  word-wrap: break-word; /* Handle long text */
+  white-space: pre-wrap;
+  line-height: 1.1;
+  font-size: 16;
 }
-
 .loading {
   color: #007bff;
 }

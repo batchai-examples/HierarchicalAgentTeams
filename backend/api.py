@@ -86,7 +86,8 @@ async def answer_generator(question: str):
                         content = msg.content
                         if content:
                             #print(content, end="", flush=True)
-                            yield f"data: {content}\n"
+                            escaped_content = content.replace("\n", "\\n")
+                            yield f"data: {escaped_content}\n\n"
                 #await asyncio.sleep(0)
     except Exception as e:
         yield f"data: [Error] {str(e)}\n\n"
