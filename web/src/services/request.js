@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-import { useSessionStore } from '@/stores/session'
 
 // 创建axios实例
 const service = axios.create({
@@ -18,12 +17,12 @@ service.interceptors.request.use(
     // Do something before request is sent
     config.headers['Content-Type'] = 'application/json'
 
-    const sessionStore = useSessionStore()
-    const accessToken = sessionStore.session.token
-    if (accessToken) {
-      // 让每个请求加上jwt token
-      config.headers['Authorization'] = `Bearer ${accessToken}`
-    }
+    // const sessionStore = useSessionStore()
+    // const accessToken = sessionStore.session.token
+    // if (accessToken) {
+    //   // 让每个请求加上jwt token
+    //   config.headers['Authorization'] = `Bearer ${accessToken}`
+    // }
 
     return config
   },

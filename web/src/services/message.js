@@ -1,18 +1,5 @@
-import { POST, GET } from './request'
+import { POST } from './request'
 
-export function newPost(content) {
-  return POST('/posts', {
-    content: content
-  })
-}
-
-export function listAllPosts() {
-  return GET('/posts')
-}
-
-export function newComment(parentId, content) {
-  return POST(`/comments`, {
-    parentId: parentId,
-    content: content
-  })
+export function ping(msg) {
+  return POST('/ping', {msg})
 }

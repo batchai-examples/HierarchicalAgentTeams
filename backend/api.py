@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from dotenv import load_dotenv
@@ -30,6 +31,12 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
 fastapi_app = FastAPI(validate_responses=False)
 fastapi_app.add_middleware(LoggingMiddleware)
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @fastapi_app.exception_handler(BaseError)
 async def custom_exception_handler(request: Request, exc: BaseError):
@@ -57,10 +64,6 @@ async def internal_exception_handler(request: Request, exc):
 
 
 ####################################################################
-class QuestionRequest(BaseModel):
-    question: str
-
-
 async def answer_generator(question: str):
     try:
         question = question.strip()
@@ -83,7 +86,7 @@ async def answer_generator(question: str):
                         content = msg.content
                         if content:
                             #print(content, end="", flush=True)
-                            yield content
+                            yield f"data: {content}\n"
                 #await asyncio.sleep(0)
     except Exception as e:
         yield f"data: [Error] {str(e)}\n\n"
@@ -91,11 +94,11 @@ async def answer_generator(question: str):
 
 
 
-@fastapi_app.post("/rest/v1/question")
-async def submit_question(request: Request, question: QuestionRequest):
+@fastapi_app.get("/rest/v1/question")
+async def submit_question(request: Request, question: str):
     async def event_stream():
         try:
-            async for data in answer_generator(question.question):
+            async for data in answer_generator(question):
                 if await request.is_disconnected():
                     break
                 yield data
