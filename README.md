@@ -1,11 +1,13 @@
-# hi-adaptive-rag
+# HierarchicalAgentTeams
 
-A Question/Answer demo based on [LangChain Adaptive RAG](https://langchain-ai.github.io/langgraph/tutorials/rag/langgraph_adaptive_rag/#compile-graph.)
+Demostrates [Hierarchical Agent Teams](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/hierarchical_agent_teams/)
 
 ## Screenshot
 
-<div align="center" width="100%">
-  <img src="doc/adaptive-rag-demo.png" width="100%">
+<div align="center">
+  <img src="doc/research_graph.png">
+  <img src="doc/paper_writing_graph.png">
+  <img src="doc/super_graph.png">
 </div>
 
 ## Setup Instructions
@@ -13,8 +15,8 @@ A Question/Answer demo based on [LangChain Adaptive RAG](https://langchain-ai.gi
 1. First, clone this repository and navigate to the project directory:
 
    ```bash
-   $ git clone https://github.com/qiangyt/hi-adaptive-rag.git
-   $ cd hi-adaptive-rag
+   $ git clone https://github.com/qiangyt/HierarchicalAgentTeams.git
+   $ cd HierarchicalAgentTeams
    ```
 
 2. Backend Setup
