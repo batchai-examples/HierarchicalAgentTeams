@@ -1,3 +1,0 @@
-###
-GET http://192.168.6.93:4080/rest/v1/question?question=Research%20AI%20agents%20and%20write%20a%20brief%20report%20about%20them
-
