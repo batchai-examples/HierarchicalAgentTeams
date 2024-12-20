@@ -14,14 +14,9 @@
       <button type="submit">Submit</button>
     </form>
 
-    <div v-if="isLoading" class="loading">Loading answer...</div>
-
-    <!-- Answer container -->
-    <div v-if="answers.length > 0" class="answers" ref="answersContainer">
-      <h2>Response:</h2>
-      <!-- Render Markdown content as HTML -->
-      <div class="answer" v-html="formattedAnswers"></div>
-    </div>
+    <h2>Response:</h2>
+    <div v-if="isLoading" class="loading">Thinking ...</div>
+    <div class="answer" v-html="formattedAnswers" ref="answersContainer"></div>
   </div>
 </template>
 
@@ -40,12 +35,7 @@ export default {
   computed: {
     formattedAnswers() {
       // Combine all answers into one Markdown string and render to HTML
-      //return marked(this.answers.join(""));
       const result = this.answers.join("").replace(/\\n/g, "\n");
-      //result = result.replace(/\n/g, "<br>");
-      if (result.indexOf("\\n") >=0 ) {
-        //alert("has feed line");
-      }
       return marked.parse(result);
     },
   },
@@ -60,7 +50,7 @@ export default {
         this.eventSource.close();
       }
 
-      const url = `http://192.168.6.93:4080/rest/v1/question?question=${encodeURIComponent(
+      const url = `${import.meta.env.VITE_API_ENDPOINT}/rest/v1/question?question=${encodeURIComponent(
         this.question
       )}`;
       this.eventSource = new EventSource(url);
@@ -74,7 +64,7 @@ export default {
           this.eventSource = null;
         } else {
           this.answers.push(data);
-          this.scrollToBottom(); // Scroll to the bottom on new data
+          this.scrollToBottom(); 
         }
       };
 
@@ -147,8 +137,6 @@ button:hover {
 
 .answers {
   margin-top: 20px;
-  max-height: 400px; /* Limit height */
-  overflow-y: auto; /* Enable scrolling */
   border: 1px solid #ddd;
   padding: 10px;
   border-radius: 4px;
@@ -157,11 +145,13 @@ button:hover {
 
 .answer {
   background: #f0f0f0;
+  max-height: 400px;
+  overflow-y: auto;
   padding: 10px;
   border-radius: 4px;
-  word-wrap: break-word; /* Handle long text */
+  word-wrap: break-word;
   white-space: pre-wrap;
-  line-height: 1.1;
+  line-height: 1.2;
   font-size: 16;
 }
 .loading {

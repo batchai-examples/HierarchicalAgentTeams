@@ -11,11 +11,11 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 7070,
+    port: 4081,
     cors: true,
     proxy: {
-      '/api': {
-        target: 'http://192.168.6.93:4080',
+      '/rest': {
+        target: process.env.VITE_API_ENDPOINT,
         changeOrigin: true,
         //rewrite: (path) => path.replace(/^\/api/, ''), // 去掉 `/api` 前缀
       },
