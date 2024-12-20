@@ -1,10 +1,12 @@
+import asyncio
 from datetime import datetime, timezone
 import http
 import os
 from logging import Logger
-from pprint import pprint
+from langchain_core.messages import HumanMessage, AIMessageChunk
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.responses import StreamingResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel
 
@@ -12,12 +14,9 @@ from dotenv import load_dotenv
 from misc import format_datetime
 from errs import BaseError
 from log import get_logger
-from workflow import workflow
+from graph import super_graph
 
 load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
-
-# Compile
-compiled_workflow = workflow.compile()
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
@@ -61,24 +60,46 @@ async def internal_exception_handler(request: Request, exc):
 class QuestionRequest(BaseModel):
     question: str
 
-class AnswerResponse(BaseModel):
-    question: str
-    answer: str
 
-@fastapi_app.post("/rest/v1/question", response_model=AnswerResponse)
-async def submit_question(request: QuestionRequest):
-    question = request.question.strip()
-    inputs = {
-        "question": question
-    }
+async def answer_generator(question: str):
+    try:
+        question = question.strip()
 
-    for output in compiled_workflow.stream(inputs):
-        for key, value in output.items():
-            # Node
-            pprint(f"Node '{key}':")
-            # Optional: print full state at each node
-            # pprint.pprint(value["keys"], indent=2, width=80, depth=None)
-        pprint("\n---\n")
-    
-    answer = value["generation"]#"Sorry, I don't know the answer to that question."
-    return {"question": question, "answer": answer}
+        async for messages in super_graph.astream(
+            {
+                "messages": [
+                    ("user", question)
+                ],
+            },
+            {"recursion_limit": 150},
+            stream_mode="messages"
+        ):
+            
+            checkpoint_ns:str = messages[1]["checkpoint_ns"]
+            is_cared_checkpoints = checkpoint_ns.startswith("search:") or checkpoint_ns.startswith("note_taker:")
+            if True or is_cared_checkpoints:
+                for msg in messages:
+                    if isinstance(msg, AIMessageChunk):
+                        content = msg.content
+                        if content:
+                            #print(content, end="", flush=True)
+                            yield content
+                #await asyncio.sleep(0)
+    except Exception as e:
+        yield f"data: [Error] {str(e)}\n\n"
+    yield "data: [DONE]\n\n"
+
+
+
+@fastapi_app.post("/rest/v1/question")
+async def submit_question(request: Request, question: QuestionRequest):
+    async def event_stream():
+        try:
+            async for data in answer_generator(question.question):
+                if await request.is_disconnected():
+                    break
+                yield data
+        except Exception as e:
+            yield f"data: [Error] {str(e)}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")

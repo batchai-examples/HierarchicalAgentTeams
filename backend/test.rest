@@ -1,6 +1,6 @@
 ###
-POST http://localhost:3001/rest/v1/question
+POST http://localhost:4080/rest/v1/question
 
 {
-    "question": "What player at the Bears expected to draft first in the 2024 NFL draft?"
+    "question": "Research AI agents and write a brief report about them."
 }
