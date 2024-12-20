@@ -1,6 +1,7 @@
 from typing import Literal
-
-from langchain_core.messages import HumanMessage
+import asyncio
+from langchain_core.messages import HumanMessage, AIMessageChunk
+from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 
@@ -47,16 +48,16 @@ def doc_writing_node(state: MessagesState) -> Command[Literal["doc_writing_team_
 
 note_taking_agent = create_react_agent(
     llm,
-    tools=[create_outline, read_document],
+    tools=[read_document],
     state_modifier=(
-        "You can read documents and create outlines for the document writer. "
+        "You can read documents and create outlines. "#"You can read documents and create outlines for the document writer. "
         "Don't ask follow-up questions."
     ),
 )
 
 
-def note_taking_node(state: MessagesState) -> Command[Literal["doc_writing_team_supervisor"]]:
-    result = note_taking_agent.invoke(state)
+def note_taking_node(state: MessagesState, config: RunnableConfig) -> Command[Literal["doc_writing_team_supervisor"]]:
+    result = note_taking_agent.invoke(state, config)
 
     last_response = result["messages"][-1].content
     return Command(
@@ -93,7 +94,7 @@ def chart_generating_node(state: MessagesState) -> Command[Literal["doc_writing_
 
 
 doc_writing_supervisor_node = make_supervisor_node(
-    llm, ["doc_writer", "note_taker", "chart_generator"]
+    llm, ["note_taker", "chart_generator"]
 )
 
 # With the objects themselves created, we can form the graph.
@@ -101,7 +102,7 @@ doc_writing_supervisor_node = make_supervisor_node(
 # Create the graph here
 paper_writing_builder = StateGraph(MessagesState)
 paper_writing_builder.add_node("doc_writing_team_supervisor", doc_writing_supervisor_node)
-paper_writing_builder.add_node("doc_writer", doc_writing_node)
+#paper_writing_builder.add_node("doc_writer", doc_writing_node)
 paper_writing_builder.add_node("note_taker", note_taking_node)
 paper_writing_builder.add_node("chart_generator", chart_generating_node)
 
@@ -119,17 +120,27 @@ paper_writing_graph = paper_writing_builder.compile()
 
 # print(f"Graph has been saved to {output_path}")
 
-# for s in paper_writing_graph.stream(
-#     {
-#         "messages": [
-#             (
-#                 "user",
-#                 "Write an outline for poem about cats and then write the poem to disk.",
-#             )
-#         ]
-#     },
-#     {"recursion_limit": 100},
-# ):
-#     pprint(s)
-#     pprint("---")
+async def test_paper_writing_team():
+    async for messages in paper_writing_graph.astream(
+        {
+            "messages": [
+                (
+                    "user",
+                    "Write an outline for poem about cats",
+                )
+            ]
+        },
+        {"recursion_limit": 100},
+        stream_mode="messages"
+    ):
+        checkpoint_ns:str = messages[1]["checkpoint_ns"]
+        if checkpoint_ns.startswith("note_taker:"):
+            for msg in messages:
+                if isinstance(msg, AIMessageChunk):
+                    content = msg.content
+                    if content:
+                        print(content, end="", flush=True)
 
+if __name__ == "__main__":
+    asyncio.run(test_paper_writing_team())
+    print()
