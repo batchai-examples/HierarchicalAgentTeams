@@ -1,0 +1,27 @@
+{
+    "path": "backend/errs.py",
+    "model_usage_metrics": {
+        "Duration": 11180269641,
+        "OpenAiUsage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+            }
+        }
+    },
+    "test_file_path": "backend/test_errs.py",
+    "existing_test_code": "",
+    "original_code": "from abc import ABC\nfrom enum import StrEnum, unique\n\nfrom fastapi import HTTPException\n\n\n@unique\nclass ErrorCode(StrEnum):  \n    NONE = \"NONE\"\n    INVALID_ENUM = \"INVALID_ENUM\"\n    INVALID_PROPERTY = \"INVALID_PROPERTY\"\n\n\nclass BaseError(HTTPException, ABC):\n    def __init__(self, status_code: int, detail: str, code):\n        super().__init__(status_code=status_code, detail=detail)\n        self.code = code\n\n\nclass Internal(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(500, detail, code)\n\n\nclass BadRequest(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(400, detail, code)\n\n\nclass Unauthorized(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(401, detail, code)\n\n\nclass Forbidden(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(403, detail, code)\n\n\nclass NotFound(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(404, detail, code)\n\n\nclass Conflict(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(409, detail, code)\n",
+    "test_code": "import pytest\nfrom backend.errs import Internal, BadRequest, Unauthorized, Forbidden, NotFound, Conflict, ErrorCode\n\n# Test cases for the error classes in backend.errs\n\ndef test_internal_error():\n    \"\"\"Test the Internal error class with default code.\"\"\"\n    error = Internal(\"Internal server error\")\n    assert error.status_code == 500\n    assert error.detail == \"Internal server error\"\n    assert error.code == ErrorCode.NONE\n\ndef test_internal_error_with_code():\n    \"\"\"Test the Internal error class with a specific error code.\"\"\"\n    error = Internal(\"Internal server error\", ErrorCode.INVALID_PROPERTY)\n    assert error.status_code == 500\n    assert error.detail == \"Internal server error\"\n    assert error.code == ErrorCode.INVALID_PROPERTY\n\ndef test_bad_request_error():\n    \"\"\"Test the BadRequest error class with default code.\"\"\"\n    error = BadRequest(\"Bad request\")\n    assert error.status_code == 400\n    assert error.detail == \"Bad request\"\n    assert error.code == ErrorCode.NONE\n\ndef test_bad_request_error_with_code():\n    \"\"\"Test the BadRequest error class with a specific error code.\"\"\"\n    error = BadRequest(\"Bad request\", ErrorCode.INVALID_ENUM)\n    assert error.status_code == 400\n    assert error.detail == \"Bad request\"\n    assert error.code == ErrorCode.INVALID_ENUM\n\ndef test_unauthorized_error():\n    \"\"\"Test the Unauthorized error class with default code.\"\"\"\n    error = Unauthorized(\"Unauthorized access\")\n    assert error.status_code == 401\n    assert error.detail == \"Unauthorized access\"\n    assert error.code == ErrorCode.NONE\n\ndef test_unauthorized_error_with_code():\n    \"\"\"Test the Unauthorized error class with a specific error code.\"\"\"\n    error = Unauthorized(\"Unauthorized access\", ErrorCode.INVALID_PROPERTY)\n    assert error.status_code == 401\n    assert error.detail == \"Unauthorized access\"\n    assert error.code == ErrorCode.INVALID_PROPERTY\n\ndef test_forbidden_error():\n    \"\"\"Test the Forbidden error class with default code.\"\"\"\n    error = Forbidden(\"Access forbidden\")\n    assert error.status_code == 403\n    assert error.detail == \"Access forbidden\"\n    assert error.code == ErrorCode.NONE\n\ndef test_forbidden_error_with_code():\n    \"\"\"Test the Forbidden error class with a specific error code.\"\"\"\n    error = Forbidden(\"Access forbidden\", ErrorCode.INVALID_ENUM)\n    assert error.status_code == 403\n    assert error.detail == \"Access forbidden\"\n    assert error.code == ErrorCode.INVALID_ENUM\n\ndef test_not_found_error():\n    \"\"\"Test the NotFound error class with default code.\"\"\"\n    error = NotFound(\"Resource not found\")\n    assert error.status_code == 404\n    assert error.detail == \"Resource not found\"\n    assert error.code == ErrorCode.NONE\n\ndef test_conflict_error():\n    \"\"\"Test the Conflict error class with default code.\"\"\"\n    error = Conflict(\"Conflict occurred\")\n    assert error.status_code == 409\n    assert error.detail == \"Conflict occurred\"\n    assert error.code == ErrorCode.NONE\n",
+    "amount_of_generated_test_cases": 10,
+    "single_test_run_command": "pytest backend/test_errs.py"
+}

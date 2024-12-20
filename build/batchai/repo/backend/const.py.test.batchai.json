@@ -1,0 +1,27 @@
+{
+    "path": "backend/const.py",
+    "model_usage_metrics": {
+        "Duration": 8618979551,
+        "OpenAiUsage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+            }
+        }
+    },
+    "test_file_path": "backend/test_constants.py",
+    "existing_test_code": "",
+    "original_code": "class Constants:\n    DATETIME_FORMAT = \"%Y-%m-%d %H:%M:%S\"\n\n    # def __setattr__(self, name, value):\n    #     if name in self.__dict__:\n    #         raise RuntimeError(f\"Can't update const ({name})\")\n    #     self.__dict__[name] = value\n\n\n# sys.modules[__name__] = Constants()\n",
+    "test_code": "import unittest\n\nclass TestConstants(unittest.TestCase):\n    \"\"\"\n    Test suite for the Constants class.\n    This suite includes tests for the DATETIME_FORMAT constant and\n    checks the immutability of the class attributes.\n    \"\"\"\n\n    def test_datetime_format(self):\n        \"\"\"\n        Test that the DATETIME_FORMAT constant is correctly defined.\n        \"\"\"\n        # Check if the DATETIME_FORMAT is set to the expected format\n        self.assertEqual(Constants.DATETIME_FORMAT, \"%Y-%m-%d %H:%M:%S\")\n\n    def test_constant_immutable(self):\n        \"\"\"\n        Test that attempting to change the DATETIME_FORMAT raises an error.\n        \"\"\"\n        # Attempt to change the DATETIME_FORMAT constant\n        with self.assertRaises(RuntimeError):\n            Constants.DATETIME_FORMAT = \"%d-%m-%Y\"\n\n    def test_invalid_constant_update(self):\n        \"\"\"\n        Test that trying to update a constant raises a RuntimeError.\n        \"\"\"\n        # Create an instance of Constants\n        constants_instance = Constants()\n        # Attempt to set a new attribute\n        with self.assertRaises(RuntimeError):\n            constants_instance.__setattr__('DATETIME_FORMAT', \"%d-%m-%Y\")\n\n    def test_no_update_on_existing_attribute(self):\n        \"\"\"\n        Test that trying to update an existing attribute raises a RuntimeError.\n        \"\"\"\n        # Create an instance of Constants\n        constants_instance = Constants()\n        # Attempt to set an existing attribute\n        with self.assertRaises(RuntimeError):\n            constants_instance.__setattr__('DATETIME_FORMAT', \"%m/%d/%Y\")\n\n    def test_constant_class_instance(self):\n        \"\"\"\n        Test that the Constants class cannot be instantiated.\n        \"\"\"\n        # Attempt to create an instance of Constants\n        with self.assertRaises(TypeError):\n            constants_instance = Constants()\n\nif __name__ == '__main__':\n    unittest.main()\n",
+    "amount_of_generated_test_cases": 5,
+    "single_test_run_command": "pytest backend/test_constants.py"
+}
