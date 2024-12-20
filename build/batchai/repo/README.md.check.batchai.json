@@ -1,0 +1,26 @@
+{
+    "has_issue": false,
+    "overall_severity": "",
+    "issues": [],
+    "fixed_code": "# HierarchicalAgentTeams\n\nDemostrates [Hierarchical Agent Teams](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/hierarchical_agent_teams/)\n\n## Screenshot\n\n\u003cvideo width=\"640\" height=\"360\" controls\u003e\n  \u003csource src=\"doc/screen.mp4\" type=\"video/mp4\"\u003e\n  Your browser does not support the video tag.\n\u003c/video\u003e\n\n\u003cdiv align=\"center\"\u003e\n  \u003cimg src=\"doc/research_graph.png\"\u003e\n  \u003cimg src=\"doc/paper_writing_graph.png\"\u003e\n  \u003cimg src=\"doc/super_graph.png\"\u003e\n\u003c/div\u003e\n\n## Setup Instructions\n\n1. First, clone this repository and navigate to the project directory:\n\n   ```bash\n   $ git clone https://github.com/qiangyt/HierarchicalAgentTeams.git\n   $ cd HierarchicalAgentTeams\n   ```\n\n2. Backend Setup\n\n   1. Create a Python Environment\n     \n      Ensure you have Python 3.11 or higher installed. Set up a virtual environment and activate it:\n\n      ```bash\n      $ python -m venv venv\n      $ source venv/bin/activate\n      ```\n\n   2. Navigate to the backend directory and install the required packages:\n\n      ```bash\n      $ cd backend\n      $ pip install --no-cache-dir -r requirements.txt\n      ```\n  \n   3. Configure Environment Variables\n  \n      Create a `.env` file in the `backend` folder based on the example file provided [.backend/.env.example](./backend/.env.example).\n     \n      At a minimum, define the following keys:\n\n      - OPENAI_API_KEY\n      - TAVILY_API_KEY\n     \n      Example `.env` file:\n    \n      ```bash\n      OPENAI_API_KEY=your_openai_api_key\n      TAVILY_API_KEY=your_tavily_api_key\n      ```\n\n3. Web Setup\n   \n    Navigate to the web directory and install frontend dependencies:\n\n    ```bash\n    $ cd web\n    $ npm ci\n    ```\n\n## Run the Application\n  \n1. Start the Backend\n\n   In the `backend` folder, run the backend server:\n\n   ```bash\n   $ cd backend\n   $ ./run.sh\n   ```\n\n2. Start the Web Application\n  \n   Open a new terminal, navigate to the web folder, and start the development server:\n  \n   ```bash\n   $ cd web\n   $ npm run dev\n   ```\n\n3. Access the Application\n\n   Open your browser and visit: http://localhost:4081\n",
+    "original_code": "# HierarchicalAgentTeams\n\nDemostrates [Hierarchical Agent Teams](https://langchain-ai.github.io/langgraph/tutorials/multi_agent/hierarchical_agent_teams/)\n\n## Screenshot\n\n\u003cvideo width=\"640\" height=\"360\" controls\u003e\n  \u003csource src=\"doc/screen.mp4\" type=\"video/mp4\"\u003e\n  Your browser does not support the video tag.\n\u003c/video\u003e\n\n\u003cdiv align=\"center\"\u003e\n  \u003cimg src=\"doc/research_graph.png\"\u003e\n  \u003cimg src=\"doc/paper_writing_graph.png\"\u003e\n  \u003cimg src=\"doc/super_graph.png\"\u003e\n\u003c/div\u003e\n\n## Setup Instructions\n\n1. First, clone this repository and navigate to the project directory:\n\n   ```bash\n   $ git clone https://github.com/qiangyt/HierarchicalAgentTeams.git\n   $ cd HierarchicalAgentTeams\n   ```\n\n2. Backend Setup\n\n   1. Create a Python Environment\n     \n      Ensure you have Python 3.11 or higher installed. Set up a virtual environment and activate it:\n\n      ```bash\n      $ python -m venv venv\n      $ source venv/bin/activate\n      ```\n\n   2. Navigate to the backend directory and install the required packages:\n\n      ```bash\n      $ cd backend\n      $ pip install --no-cache-dir -r requirements.txt\n      ```\n  \n   3. Configure Environment Variables\n  \n      Create a `.env` file in the `backend` folder based on the example file provided [.backend/.env.example](./backend/.env.example).\n     \n      At a minimum, define the following keys:\n\n      - OPENAI_API_KEY\n      - TAVILY_API_KEY\n     \n      Example `.env` file:\n    \n      ```bash\n      OPENAI_API_KEY=your_openai_api_key\n      TAVILY_API_KEY=your_tavily_api_key\n      ```\n\n3. Web Setup\n   \n    Navigate to the web directory and install frontend dependencies:\n\n    ```bash\n    $ cd web\n    $ npm ci\n    ```\n\n## Run the Application\n  \n1. Start the Backend\n\n   In the `backend` folder, run the backend server:\n\n   ```bash\n   $ cd backend\n   $ ./run.sh\n   ```\n\n2. Start the Web Application\n  \n   Open a new terminal, navigate to the web folder, and start the development server:\n  \n   ```bash\n   $ cd web\n   $ npm run dev\n   ```\n\n3. Access the Application\n\n   Open your browser and visit: http://localhost:4081\n",
+    "path": "README.md",
+    "model_usage_metrics": {
+        "Duration": 2574086232,
+        "OpenAiUsage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+            }
+        }
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "has_issue": false,
+    "overall_severity": "",
+    "issues": [],
+    "fixed_code": "{\n  \"$schema\": \"https://json.schemastore.org/prettierrc\",\n  \"semi\": false,\n  \"tabWidth\": 2,\n  \"singleQuote\": true,\n  \"printWidth\": 100,\n  \"trailingComma\": \"none\"\n}\n",
+    "original_code": "{\n  \"$schema\": \"https://json.schemastore.org/prettierrc\",\n  \"semi\": false,\n  \"tabWidth\": 2,\n  \"singleQuote\": true,\n  \"printWidth\": 100,\n  \"trailingComma\": \"none\"\n}\n",
+    "path": "web/.prettierrc.json",
+    "model_usage_metrics": {
+        "Duration": 939190783,
+        "OpenAiUsage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+            }
+        }
+    }
+}

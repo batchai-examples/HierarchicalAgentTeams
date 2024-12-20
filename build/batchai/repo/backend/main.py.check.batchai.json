@@ -1,0 +1,26 @@
+{
+    "has_issue": false,
+    "overall_severity": "",
+    "issues": [],
+    "fixed_code": "import uvicorn\n\nfrom api import fastapi_app\n\nif __name__ == \"__main__\":\n    uvicorn.run(fastapi_app, host=\"0.0.0.0\", port=4080)\n",
+    "original_code": "import uvicorn\n\nfrom api import fastapi_app\n\nif __name__ == \"__main__\":\n    uvicorn.run(fastapi_app, host=\"0.0.0.0\", port=4080)\n",
+    "path": "backend/main.py",
+    "model_usage_metrics": {
+        "Duration": 2037595329,
+        "OpenAiUsage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+            }
+        }
+    }
+}

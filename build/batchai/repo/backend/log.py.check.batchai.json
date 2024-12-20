@@ -1,0 +1,51 @@
+{
+    "has_issue": true,
+    "overall_severity": "minor",
+    "issues": [
+        {
+            "short_description": "Inconsistent type hinting for 'level' parameter.",
+            "detailed_explaination": "The 'level' parameter in the 'get_logger' function is defined with a union type of 'str' and 'int', but the default value is a string ('auto'). This can lead to confusion and potential runtime errors if an integer is passed instead of a string.",
+            "suggestion": "Consider changing the type hint to only accept 'str' or ensure that the function can handle both types appropriately.",
+            "issue_line_begin": 7,
+            "issue_line_end": 7,
+            "issue_reference_urls": [
+                "https://docs.python.org/3/library/typing.html#typing.Union"
+            ],
+            "severity": "minor",
+            "severity_reason": "Type hinting should be consistent to avoid confusion."
+        },
+        {
+            "short_description": "Logger not properly configured for 'auto' level.",
+            "detailed_explaination": "When the 'level' parameter is set to 'auto', the logger's effective level is retrieved, but it may not be properly set if the logger has not been configured beforehand. This can lead to unexpected logging behavior.",
+            "suggestion": "Ensure that the logger is configured correctly before retrieving its effective level.",
+            "issue_line_begin": 10,
+            "issue_line_end": 10,
+            "issue_reference_urls": [
+                "https://docs.python.org/3/library/logging.html#logging.Logger.getEffectiveLevel"
+            ],
+            "severity": "minor",
+            "severity_reason": "Improper logger configuration can lead to unexpected behavior."
+        }
+    ],
+    "fixed_code": "import logging\nfrom logging import Logger\n\nfrom pydantic import BaseModel\n\napp_logger = logging.getLogger(\"app\")\n\n\nclass LogConfig(BaseModel):\n    level: str\n    format: str\n\n\ndef get_logger(name: str, level: str = \"auto\") -\u003e logging.Logger:  # Changed type hinting for consistency\n    r = logging.getLogger(f\"{app_logger.name}.{name}\")\n    if level == \"auto\":\n        level = app_logger.getEffectiveLevel()\n    r.setLevel(level)\n    return r\n\n\ndef init_loggers(cfg: LogConfig) -\u003e Logger:\n    app_logger.setLevel(cfg.level)\n\n    formatter = logging.Formatter(cfg.format)\n\n    console_handler = logging.StreamHandler()\n    console_handler.setFormatter(formatter)\n    app_logger.addHandler(console_handler)\n\n    return app_logger\n",
+    "original_code": "import logging\nfrom logging import Logger\n\nfrom pydantic import BaseModel\n\napp_logger = logging.getLogger(\"app\")\n\n\nclass LogConfig(BaseModel):\n    level: str\n    format: str\n\n\ndef get_logger(name: str, level: str | int = \"auto\") -\u003e logging.Logger:\n    r = logging.getLogger(f\"{app_logger.name}.{name}\")\n    if level == \"auto\":\n        level = app_logger.getEffectiveLevel()\n    r.setLevel(level)\n    return r\n\n\ndef init_loggers(cfg: LogConfig) -\u003e Logger:\n    app_logger.setLevel(cfg.level)\n\n    formatter = logging.Formatter(cfg.format)\n\n    console_handler = logging.StreamHandler()\n    console_handler.setFormatter(formatter)\n    app_logger.addHandler(console_handler)\n\n    return app_logger\n",
+    "path": "backend/log.py",
+    "model_usage_metrics": {
+        "Duration": 8455358906,
+        "OpenAiUsage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+            }
+        }
+    }
+}

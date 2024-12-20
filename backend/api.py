@@ -56,7 +56,8 @@ async def custom_exception_handler(request: Request, exc: BaseError):
 async def internal_exception_handler(request: Request, exc):
     if isinstance(exc, BaseError):
         return await custom_exception_handler(request, exc)
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    status_code = getattr(exc, 'status_code', 500)  # Use 500 as default if status_code doesn't exist
+    return JSONResponse(status_code=status_code, content={"detail": exc.detail})
 
  
 

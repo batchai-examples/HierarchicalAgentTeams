@@ -169,7 +169,7 @@ def get_client_ip(req: Request) -> str:
 
 
 def get_client_port(req: Request) -> int:
-    x_forwarded_port = req.headers.get("f-forwarded-port")
+    x_forwarded_port = req.headers.get("x-forwarded-port")  # Fixed header key
     if x_forwarded_port:
         return int(x_forwarded_port)
     if req.client:

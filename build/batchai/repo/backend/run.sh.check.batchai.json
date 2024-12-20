@@ -1,0 +1,26 @@
+{
+    "has_issue": false,
+    "overall_severity": "",
+    "issues": [],
+    "fixed_code": "#!/bin/bash\n\nsource .env\n\nexport OPENAI_API_KEY\nexport OPENAI_PROXY_URL\nexport TAVILY_API_KEY\nexport HTTPS_PROXY\nexport HTTP_PROXY\n\npython main.py\n",
+    "original_code": "#!/bin/bash\n\nsource .env\n\nexport OPENAI_API_KEY\nexport OPENAI_PROXY_URL\nexport TAVILY_API_KEY\nexport HTTPS_PROXY\nexport HTTP_PROXY\n\npython main.py\n",
+    "path": "backend/run.sh",
+    "model_usage_metrics": {
+        "Duration": 1450820784,
+        "OpenAiUsage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+            }
+        }
+    }
+}

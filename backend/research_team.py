@@ -18,7 +18,7 @@ from tools import tavily_tool, scrape_webpages, make_supervisor_node
 # The research team will have a search agent and a web scraping "research_agent" as the two worker nodes. 
 # Let's create those, as well as the team research_team_supervisor.
 
-llm = ChatOpenAI(model="gpt-4o")
+llm = ChatOpenAI(model="gpt-4")  # Changed from "gpt-4o" to "gpt-4"
 
 search_agent = create_react_agent(llm, tools=[tavily_tool])
 

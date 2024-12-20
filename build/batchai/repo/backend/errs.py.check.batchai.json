@@ -1,0 +1,26 @@
+{
+    "has_issue": false,
+    "overall_severity": "",
+    "issues": [],
+    "fixed_code": "from abc import ABC\nfrom enum import StrEnum, unique\n\nfrom fastapi import HTTPException\n\n\n@unique\nclass ErrorCode(StrEnum):  \n    NONE = \"NONE\"\n    INVALID_ENUM = \"INVALID_ENUM\"\n    INVALID_PROPERTY = \"INVALID_PROPERTY\"\n\n\nclass BaseError(HTTPException, ABC):\n    def __init__(self, status_code: int, detail: str, code):\n        super().__init__(status_code=status_code, detail=detail)\n        self.code = code\n\n\nclass Internal(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(500, detail, code)\n\n\nclass BadRequest(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(400, detail, code)\n\n\nclass Unauthorized(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(401, detail, code)\n\n\nclass Forbidden(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(403, detail, code)\n\n\nclass NotFound(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(404, detail, code)\n\n\nclass Conflict(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(409, detail, code)\n",
+    "original_code": "from abc import ABC\nfrom enum import StrEnum, unique\n\nfrom fastapi import HTTPException\n\n\n@unique\nclass ErrorCode(StrEnum):  \n    NONE = \"NONE\"\n    INVALID_ENUM = \"INVALID_ENUM\"\n    INVALID_PROPERTY = \"INVALID_PROPERTY\"\n\n\nclass BaseError(HTTPException, ABC):\n    def __init__(self, status_code: int, detail: str, code):\n        super().__init__(status_code=status_code, detail=detail)\n        self.code = code\n\n\nclass Internal(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(500, detail, code)\n\n\nclass BadRequest(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(400, detail, code)\n\n\nclass Unauthorized(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(401, detail, code)\n\n\nclass Forbidden(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(403, detail, code)\n\n\nclass NotFound(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(404, detail, code)\n\n\nclass Conflict(BaseError):\n    def __init__(self, detail: str, code: ErrorCode = ErrorCode.NONE):\n        super().__init__(409, detail, code)\n",
+    "path": "backend/errs.py",
+    "model_usage_metrics": {
+        "Duration": 943240506,
+        "OpenAiUsage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+            }
+        }
+    }
+}

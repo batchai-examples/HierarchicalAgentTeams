@@ -1,0 +1,26 @@
+{
+    "has_issue": false,
+    "overall_severity": "",
+    "issues": [],
+    "fixed_code": "class Constants:\n    DATETIME_FORMAT = \"%Y-%m-%d %H:%M:%S\"\n\n    # def __setattr__(self, name, value):\n    #     if name in self.__dict__:\n    #         raise RuntimeError(f\"Can't update const ({name})\")\n    #     self.__dict__[name] = value\n\n\n# sys.modules[__name__] = Constants()\n",
+    "original_code": "class Constants:\n    DATETIME_FORMAT = \"%Y-%m-%d %H:%M:%S\"\n\n    # def __setattr__(self, name, value):\n    #     if name in self.__dict__:\n    #         raise RuntimeError(f\"Can't update const ({name})\")\n    #     self.__dict__[name] = value\n\n\n# sys.modules[__name__] = Constants()\n",
+    "path": "backend/const.py",
+    "model_usage_metrics": {
+        "Duration": 1084614950,
+        "OpenAiUsage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+            }
+        }
+    }
+}

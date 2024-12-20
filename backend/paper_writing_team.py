@@ -50,7 +50,7 @@ note_taking_agent = create_react_agent(
     llm,
     tools=[read_document],
     state_modifier=(
-        "You can read documents and create outlines. "#"You can read documents and create outlines for the document writer. "
+        "You can read documents and create outlines. You can read documents and create outlines for the document writer. "
         "Don't ask follow-up questions."
     ),
 )

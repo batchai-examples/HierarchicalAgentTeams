@@ -21,7 +21,7 @@ from paper_writing_team import paper_writing_graph
 # define how this top-level state is shared between the different graphs.
 
 
-llm = ChatOpenAI(model="gpt-4o")
+llm = ChatOpenAI(model="gpt-4")  # Updated model name
 
 teams_supervisor_node = make_supervisor_node(llm, ["research_team", "writing_team"])
 
